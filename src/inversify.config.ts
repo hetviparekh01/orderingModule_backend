@@ -1,12 +1,12 @@
 import {Container} from "inversify";
-import { HomeService } from "./services/home.service";
-import { SectionService } from "./services/section.service";
-import { ContentService } from "./services/content.service";
 import { TYPES } from "./constants/TYPES";
+import { AreaService } from "./services/area.service";
+import { ItemService } from "./services/item.service";
+import { AreaItemService } from "./services/areaItem.service";
 
 const container=new Container()
-container.bind<HomeService>(TYPES.HomeService).to(HomeService)
-container.bind<SectionService>(TYPES.SectionService).to(SectionService)
-container.bind<ContentService>(TYPES.ContentService).to(ContentService)
+container.bind<AreaService>(TYPES.AreaServcie).to(AreaService)
+container.bind<ItemService>(TYPES.ItemService).to(ItemService)
+container.bind<AreaItemService>(TYPES.AreaItemService).to(AreaItemService)
 
 export default container
