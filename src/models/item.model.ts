@@ -3,7 +3,7 @@ import mongoose, { Schema } from "mongoose";
 const ItemSchema=new Schema({
     itemName:{
         type:String,
-        required:true
+        required:true,
     }
 })
 

@@ -11,9 +11,19 @@ export class ItemService {
             throw (error)
         }
     }
-    async getAllItems() {
+    async getAllItems(queryParams:any) {
         try {
-            const data = await Item.find({})
+            const pageSize = Number(queryParams.page);
+            const limit = Number(queryParams.limit);
+            const skip = (pageSize - 1) * limit;
+            const data = await Item.aggregate([
+                {
+                    $skip: skip,
+                },
+                {
+                    $limit: limit
+                }
+            ])
             return data
         } catch (error) {
             throw (error)

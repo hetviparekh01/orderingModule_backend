@@ -14,19 +14,20 @@ export class ItemController {
         try {
             const { itemName } = req.body;
             await this.itemService.addItem({ itemName } as IItem);
-            return res.status(201).json({ message: "Item Created Successfully" });
+            return res.status(201).json({status:true, message: "Item Created Successfully" });
         } catch (error) {
-            return res.status(500).json({ message: error.message });
+            return res.status(500).json({status:false, message: error.message });
         }
     }
 
     @httpGet("/getItems")
     async getAllItems(req: Request, res: Response) {
         try {
-            const data=await this.itemService.getAllItems();
-            return res.status(201).json({ data: data });
+            const { page, limit } = req.query;
+            const data = await this.itemService.getAllItems({ page, limit });
+            return res.status(201).json({status:true, data: data });
         } catch (error) {
-            return res.status(500).json({ message: error.message });
+            return res.status(500).json({status:false, message: error.message });
         }
     }
 }

@@ -13,8 +13,8 @@ export class AreaService {
     }
     async getAllAreas(queryParams:any) {
         try {
-            const pageSize=Number(queryParams.page);
-            const limit =Number(queryParams.limit);
+            const pageSize=Number(queryParams.page) || 1;
+            const limit =Number(queryParams.limit) || 5;
             const skip = (pageSize - 1) * limit;
             const data = await Area.aggregate([
                 {
@@ -22,6 +22,9 @@ export class AreaService {
                 },
                 {
                     $limit: limit
+                },
+                {
+                    $sort:{sequence:1}
                 }
             ])
             return data
@@ -29,17 +32,38 @@ export class AreaService {
             throw (error)
         }
     }
-    async changeSequence(areaData: IArea) {
+    async changeSequence(areaData: any) {
         try {
+            const highestSequenceData=await Area.find().sort({sequence:-1}).limit(1);
+            if (!highestSequenceData[0].sequence){
+                throw new Error("No data found")
+            }
+            if (areaData.sequence > highestSequenceData[0].sequence){
+                throw new Error("Not a valid sequence")
+            }
             const data = await Area.findById(areaData.areaId)
+            let sequence = {};
+            let inrDcr=1
+            if(!data?.sequence){
+                throw new Error('Area not found')
+            }
+            if (areaData.sequence > data?.sequence) {
+                sequence={
+                    $gt:data?.sequence,
+                    $lte:areaData.sequence
+                }
+                inrDcr=-1
+            }else{
+                sequence={
+                    $gte: areaData.sequence,
+                    $lt: data?.sequence
+                }
+            }
             await Area.updateMany(
                 {
-                    sequence: {
-                        $gte: areaData.sequence,
-                        $lt: data?.sequence
-                    }
+                   sequence
                 },
-                { $inc: { sequence: 1 } }
+                { $inc: { sequence: inrDcr } }
             );
             await Area.findByIdAndUpdate( areaData.areaId,
                 { $set: { sequence: areaData.sequence } }
@@ -50,6 +74,7 @@ export class AreaService {
     }
 
     async deleteArea(areaId: string) {
+
         try {
             const data = await Area.findById(areaId)
             await Area.updateMany(
