@@ -18,6 +18,44 @@ export class AreaService {
             const skip = (pageSize - 1) * limit;
             const data = await Area.aggregate([
                 {
+                    $lookup: {
+                        from: "areaitems",
+                        localField: "_id",
+                        foreignField: "areaId",
+                        let: { itemInfo: "$itemId" },
+                        pipeline: [
+                            {
+                                $lookup: {
+                                    from: "items",
+                                    localField: "itemId",
+                                    foreignField: "_id",
+                                    as: "itemDetails"
+                                }
+                            },
+                            {
+                                $unwind: {
+                                    path: "$itemDetails"
+                                }
+                            }
+                        ],
+                        as: "areaItemDetails",
+                    }
+                },
+                {
+                    $project: {
+                        _id: 1,
+                        areaName: 1,
+                        sequence: 1,
+                        areaItemDetails: {
+                            $sortArray: {
+                                input: "$areaItemDetails",
+                                sortBy: { sequence: 1 }
+                            }
+                        },
+                        itemDetails: 1
+                    }
+                },
+                {
                     $skip:skip,
                 },
                 {
